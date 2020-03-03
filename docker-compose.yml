@@ -1,0 +1,20 @@
+version: "3"
+
+services:
+  es2:
+    image: elasticsearch:2.4
+    environment:
+      - discovery.type=single-node
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ports:
+    - 9200:9200
+
+  es7:
+    image: docker.elastic.co/elasticsearch/elasticsearch-oss:7.4.2
+    environment:
+      - discovery.type=single-node
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ports:
+    - 9201:9200
