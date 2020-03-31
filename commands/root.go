@@ -33,6 +33,7 @@ func NewRootCmd(out io.Writer, args []string) *cobra.Command {
 		newRunCmd(),
 		newSamplerCmd(),
 		newCountCmd(),
+		newVersionCmd(out),
 	)
 
 	flags := cmd.PersistentFlags()
