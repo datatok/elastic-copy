@@ -18,8 +18,7 @@ func newVersionCmd(out io.Writer)  *cobra.Command {
 	o := &versionOptions{}
 
 	cmd := &cobra.Command{
-		Use:     "run",
-		Aliases: []string{"gen"},
+		Use:     "version",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return o.run(out)
 		},
