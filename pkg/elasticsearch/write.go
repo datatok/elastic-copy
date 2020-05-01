@@ -69,7 +69,7 @@ func (c *Client) Write(process engine.ProcessQuery, data [] engine.Datum) engine
 				WithField("batch_id", currBatch).
 				Debug("bulk sending")
 			 */
-			res, err = es.Bulk(bytes.NewReader(buf.Bytes()), es.Bulk.WithIndex(index + "/events"))
+			res, err = es.Bulk(bytes.NewReader(buf.Bytes()), es.Bulk.WithIndex(index))
 
 			if err != nil {
 				log.WithField("index", index).
