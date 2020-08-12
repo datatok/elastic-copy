@@ -15,13 +15,15 @@ import (
 )
 
 type RunAction struct {
-	Source, Target, Query string
+	Source, Target, Query, TargetIndexType string
 	Indices               []string
 	Count                 uint64
 
 	Results map[string]*engine.ProcessResult
 
 	WriteBatchSize, ReadBatchSize, Threads int
+
+	ForceType string
 }
 
 type ThreadCopyPayload struct {
@@ -98,6 +100,7 @@ func (a *RunAction) copyAction(sourceClient *elasticsearch.Client, targetClient 
 			FailFast:  true,
 			BatchSize: a.WriteBatchSize,
 			ReadQuery: readQuery,
+			TypeOverride: a.ForceType,
 		}
 
 		startDate := time.Now().UTC()
@@ -150,7 +153,7 @@ func (a *RunAction) copyAction(sourceClient *elasticsearch.Client, targetClient 
 func (a *RunAction) Run() {
 	sourceClient := elasticsearch.NewClient(a.Source)
 
-	targetClient := getTarget(a.Target)
+	targetClient := getTarget(a)
 
 	defer ants.Release()
 
@@ -168,15 +171,15 @@ func (a *RunAction) Run() {
 	}
 }
 
-func getTarget(URL string) engine.Target {
+func getTarget(a *RunAction) engine.Target {
 	var (
 		targetClient engine.Target
 	)
 
-	if URL == utils.TARGET_STDOUT {
+	if a.Target == utils.TARGET_STDOUT {
 		targetClient = stdio.NewClient()
 	} else {
-		targetClient = elasticsearch.NewClient(URL)
+		targetClient = elasticsearch.NewClient(a.Target)
 	}
 
 	return targetClient

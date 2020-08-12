@@ -10,7 +10,7 @@ const WRITE_RESULT_OK = "ok"
 const WRITE_RESULT_FAILFAST = "fail_fast"
 
 type Datum struct {
-	Index, ID string
+	Type, Index, ID string
 	Body string
 }
 
@@ -47,6 +47,7 @@ type ProcessQuery struct {
 	FailFast bool
 	BatchSize int
 	ReadQuery ReadQuery
+	TypeOverride string
 }
 
 /**

@@ -31,6 +31,7 @@ func (c *Client) Write(process engine.ProcessQuery, data [] engine.Datum) engine
 	bEOL := []byte("\n")
 	es := c.Client
 	index := data[0].Index
+	indexType := data[0].Type
 
 	if count % batch == 0 {
 		numBatches = count / batch
@@ -69,7 +70,16 @@ func (c *Client) Write(process engine.ProcessQuery, data [] engine.Datum) engine
 				WithField("batch_id", currBatch).
 				Debug("bulk sending")
 			 */
-			res, err = es.Bulk(bytes.NewReader(buf.Bytes()), es.Bulk.WithIndex(index))
+
+			bulkReader := bytes.NewReader(buf.Bytes())
+
+			if len(indexType) == 0 || process.TypeOverride == "_" {
+				res, err = es.Bulk(bulkReader, es.Bulk.WithIndex(index))
+			} else if len(process.TypeOverride) > 0 {
+				res, err = es.Bulk(bulkReader, es.Bulk.WithIndex(index), es.Bulk.WithDocumentType(indexType))
+			} else {
+				res, err = es.Bulk(bulkReader, es.Bulk.WithIndex(index), es.Bulk.WithDocumentType(indexType))
+			}
 
 			if err != nil {
 				log.WithField("index", index).

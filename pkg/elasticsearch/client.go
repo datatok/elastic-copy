@@ -2,11 +2,15 @@ package elasticsearch
 
 import (
 	"bytes"
+	"crypto/tls"
 	"encoding/json"
 	elasticsearch7 "github.com/elastic/go-elasticsearch/v7"
 	log "github.com/sirupsen/logrus"
 	"github.com/tidwall/gjson"
 	"io"
+	"net"
+	"net/http"
+	"time"
 )
 
 type Client struct {
@@ -25,6 +29,17 @@ func NewClient(URL string) *Client {
 	esClient, _ := elasticsearch7.NewClient(elasticsearch7.Config{
 		Addresses: []string{
 			URL,
+		},
+		Transport: &http.Transport{
+			MaxIdleConnsPerHost:   12,
+			ResponseHeaderTimeout: time.Second,
+			DialContext: (&net.Dialer{
+				Timeout:   30 * time.Second,
+				KeepAlive: 30 * time.Second,
+			}).DialContext,
+			TLSClientConfig: &tls.Config{
+				InsecureSkipVerify: true,
+			},
 		},
 	})
 
