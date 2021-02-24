@@ -32,7 +32,7 @@ func NewClient(URL string) *Client {
 		},
 		Transport: &http.Transport{
 			MaxIdleConnsPerHost:   12,
-			ResponseHeaderTimeout: time.Second,
+			ResponseHeaderTimeout: 10 * time.Second,
 			DialContext: (&net.Dialer{
 				Timeout:   30 * time.Second,
 				KeepAlive: 30 * time.Second,
