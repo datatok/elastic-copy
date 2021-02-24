@@ -24,6 +24,8 @@ type RunAction struct {
 	WriteBatchSize, ReadBatchSize, Threads int
 
 	ForceType string
+
+	FailFast bool
 }
 
 type ThreadCopyPayload struct {
@@ -97,7 +99,7 @@ func (a *RunAction) copyAction(sourceClient *elasticsearch.Client, targetClient 
 		}
 
 		process := engine.ProcessQuery{
-			FailFast:  true,
+			FailFast:  a.FailFast,
 			BatchSize: a.WriteBatchSize,
 			ReadQuery: readQuery,
 			TypeOverride: a.ForceType,

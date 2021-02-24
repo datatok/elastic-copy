@@ -31,6 +31,7 @@ func newRunCmd()  *cobra.Command {
 	flags.IntVar(&action.WriteBatchSize, "write_batch", 20, "how many documents to send to writer in one batch")
 	flags.IntVar(&action.Threads, "threads", 5, "Number of threads in pool")
 	flags.StringVar(&action.ForceType, "type-override", "", "")
+	flags.BoolVar(&action.FailFast, "fail-fast", true, "")
 
 	return cmd
 }
