@@ -76,7 +76,7 @@ func (c *Client) Write(process engine.ProcessQuery, data [] engine.Datum) engine
 			if len(indexType) == 0 || process.TypeOverride == "_" {
 				res, err = es.Bulk(bulkReader, es.Bulk.WithIndex(index))
 			} else if len(process.TypeOverride) > 0 {
-				res, err = es.Bulk(bulkReader, es.Bulk.WithIndex(index), es.Bulk.WithDocumentType(indexType))
+				res, err = es.Bulk(bulkReader, es.Bulk.WithIndex(index), es.Bulk.WithDocumentType(process.TypeOverride))
 			} else {
 				res, err = es.Bulk(bulkReader, es.Bulk.WithIndex(index), es.Bulk.WithDocumentType(indexType))
 			}
