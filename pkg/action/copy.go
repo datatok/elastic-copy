@@ -1,23 +1,24 @@
 package action
 
 import (
+	"os"
+	"sync"
+	"time"
+
 	"github.com/cheggaaa/pb/v3"
-	"github.com/panjf2000/ants/v2"
 	"github.com/ebuildy/elastic-copy/pkg/cli"
 	"github.com/ebuildy/elastic-copy/pkg/elasticsearch"
 	"github.com/ebuildy/elastic-copy/pkg/engine"
 	"github.com/ebuildy/elastic-copy/pkg/stdio"
 	"github.com/ebuildy/elastic-copy/pkg/utils"
+	"github.com/panjf2000/ants/v2"
 	log "github.com/sirupsen/logrus"
-	"os"
-	"sync"
-	"time"
 )
 
 type RunAction struct {
 	Source, Target, Query, TargetIndexType string
-	Indices               []string
-	Count                 uint64
+	Indices                                []string
+	Count                                  uint64
 
 	Results map[string]*engine.ProcessResult
 
@@ -35,7 +36,7 @@ type ThreadCopyPayload struct {
 
 func NewRunAction(settings *cli.EnvSettings) *RunAction {
 	return &RunAction{
-		Results: make(map[string] *engine.ProcessResult),
+		Results: make(map[string]*engine.ProcessResult),
 	}
 }
 
@@ -51,9 +52,9 @@ func (a *RunAction) countAction(sourceClient *elasticsearch.Client) {
 			WithField("documents", index.DocumentsCount).
 			WithField("shards", index.ShardsCount).
 			Info("start copy")
-		
+
 		a.Results[index.Name] = &engine.ProcessResult{
-			Index: index,
+			Index:        index,
 			CountEntries: index.DocumentsCount,
 		}
 
@@ -92,16 +93,16 @@ func (a *RunAction) copyAction(sourceClient *elasticsearch.Client, targetClient 
 
 		readQuery := engine.ReadQuery{
 			BatchSize: a.ReadBatchSize,
-			Query: a.Query,
-			Index: index,
-			Count: a.Count,
-			Shard: shard.ID,
+			Query:     a.Query,
+			Index:     index,
+			Count:     a.Count,
+			Shard:     shard.ID,
 		}
 
 		process := engine.ProcessQuery{
-			FailFast:  a.FailFast,
-			BatchSize: a.WriteBatchSize,
-			ReadQuery: readQuery,
+			FailFast:     a.FailFast,
+			BatchSize:    a.WriteBatchSize,
+			ReadQuery:    readQuery,
 			TypeOverride: a.ForceType,
 		}
 
@@ -186,4 +187,3 @@ func getTarget(a *RunAction) engine.Target {
 
 	return targetClient
 }
-

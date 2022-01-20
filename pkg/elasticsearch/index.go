@@ -1,13 +1,15 @@
 package elasticsearch
 
 import (
-	"github.com/panjf2000/ants/v2"
-	"github.com/ebuildy/elastic-copy/pkg/engine"
-	log "github.com/sirupsen/logrus"
-	"github.com/tidwall/gjson"
+	"encoding/json"
 	"regexp"
 	"strings"
 	"sync"
+
+	"github.com/ebuildy/elastic-copy/pkg/engine"
+	"github.com/panjf2000/ants/v2"
+	log "github.com/sirupsen/logrus"
+	"github.com/tidwall/gjson"
 )
 
 func (c *Client) ResolveIndex(indexExpression string) []engine.SourceCollection {
@@ -54,17 +56,36 @@ func (c *Client) getIndexInfo(index gjson.Result) *engine.SourceCollection {
 	return &engine.SourceCollection{
 		Name:           indexName,
 		Shards:         shards,
-		ShardsCount:	len(shards),
+		ShardsCount:    len(shards),
 		DocumentsCount: index.Get("docs.count").Uint(),
 	}
+}
+
+// Get only "query" part
+func extractQuery(query string) string {
+	if query == "" {
+		return ""
+	}
+
+	queryData := gjson.Get(query, "query")
+
+	if queryData.Exists() {
+		str, _ := json.Marshal(map[string]interface{}{"query": queryData.Value()})
+
+		return string(str)
+	}
+
+	return ""
 }
 
 func (c *Client) CountDocuments(index string, query string) uint64 {
 	es := c.Client
 
+	realQuery := extractQuery(query)
+
 	res, err := es.Count(
 		es.Count.WithIndex(index),
-		es.Count.WithQuery(query),
+		es.Count.WithBody(strings.NewReader(realQuery)),
 	)
 
 	if err != nil {
@@ -104,7 +125,7 @@ func (c *Client) getIndexShardsInfo(index string) []engine.CollectionShard {
 
 	indexEscaped := strings.Replace(index, ".", "\\.", -1)
 
-	gjson.Get(json, "indices." + indexEscaped + ".shards").ForEach(func(k gjson.Result, v gjson.Result) bool {
+	gjson.Get(json, "indices."+indexEscaped+".shards").ForEach(func(k gjson.Result, v gjson.Result) bool {
 		shards = append(shards, engine.CollectionShard{
 			ID:   k.String(),
 			Name: k.String(),

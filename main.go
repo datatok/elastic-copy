@@ -1,9 +1,10 @@
 package main
 
 import (
-	"github.com/ebuildy/elastic-copy/commands"
 	"log"
 	"os"
+
+	"github.com/ebuildy/elastic-copy/commands"
 )
 
 func init() {

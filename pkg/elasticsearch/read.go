@@ -1,26 +1,30 @@
 package elasticsearch
 
 import (
+	"strings"
+	"time"
+
 	"github.com/cheggaaa/pb/v3"
-	"github.com/elastic/go-elasticsearch/v7/esapi"
 	"github.com/ebuildy/elastic-copy/pkg/engine"
+	"github.com/elastic/go-elasticsearch/v7/esapi"
 	log "github.com/sirupsen/logrus"
 	"github.com/tidwall/gjson"
-	"time"
 )
 
 func (c *Client) Read(process engine.ProcessQuery, writer engine.Target, progressReporter *pb.ProgressBar) engine.ProcessShardResult {
 	var (
-		batchNum int
-		foundItems uint64
-		scrollID string
-		index = process.ReadQuery.Index
-		es = c.Client
-		err error
-		res *esapi.Response
+		batchNum      int
+		foundItems    uint64
+		scrollID      string
+		index         = process.ReadQuery.Index
+		es            = c.Client
+		err           error
+		res           *esapi.Response
 		processResult engine.ProcessShardResult
-		query = process.ReadQuery
+		query         = process.ReadQuery
 	)
+
+	log.Info(strings.NewReader(query.Query))
 
 	for {
 		batchNum++
@@ -30,9 +34,10 @@ func (c *Client) Read(process engine.ProcessQuery, writer engine.Target, progres
 			res, err = es.Search(
 				es.Search.WithIndex(index.Name),
 				es.Search.WithSize(process.BatchSize),
-				es.Search.WithQuery(query.Query),
+				//es.Search.WithQuery(query.Query),
+				es.Search.WithBody(strings.NewReader(query.Query)),
 				es.Search.WithScroll(time.Minute),
-				es.Search.WithPreference("_shards:" + query.Shard),
+				es.Search.WithPreference("_shards:"+query.Shard),
 			)
 		} else {
 			res, err = es.Scroll(

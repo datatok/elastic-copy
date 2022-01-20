@@ -1,3 +1,4 @@
 .idea
 _dist
 bin
+.DS_Store

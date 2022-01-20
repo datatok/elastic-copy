@@ -4,13 +4,14 @@ import (
 	"bytes"
 	"crypto/tls"
 	"encoding/json"
-	elasticsearch7 "github.com/elastic/go-elasticsearch/v7"
-	log "github.com/sirupsen/logrus"
-	"github.com/tidwall/gjson"
 	"io"
 	"net"
 	"net/http"
 	"time"
+
+	elasticsearch7 "github.com/elastic/go-elasticsearch/v7"
+	log "github.com/sirupsen/logrus"
+	"github.com/tidwall/gjson"
 )
 
 type Client struct {
@@ -20,7 +21,6 @@ type Client struct {
 
 	Indices []gjson.Result
 }
-
 
 /**
  * Build a new elasticsearch client.
@@ -32,7 +32,7 @@ func NewClient(URL string) *Client {
 		},
 		Transport: &http.Transport{
 			MaxIdleConnsPerHost:   12,
-			ResponseHeaderTimeout: 10 * time.Second,
+			ResponseHeaderTimeout: 30 * time.Second,
 			DialContext: (&net.Dialer{
 				Timeout:   30 * time.Second,
 				KeepAlive: 30 * time.Second,
@@ -44,18 +44,18 @@ func NewClient(URL string) *Client {
 	})
 
 	cc := &Client{
-		Client:  esClient,
-		URL:     URL,
+		Client: esClient,
+		URL:    URL,
 	}
 
 	cc.getServerVersion()
 
-	log.WithField("version", cc.Version).
-		Info("Connected to elasticsearch server")
-
 	cc.fetchIndices()
 
-	log.Infof("See %d indices", len(cc.Indices))
+	log.WithField("version", cc.Version).
+		WithField("URL", URL).
+		WithField("indices", len(cc.Indices)).
+		Info("Connected to elasticsearch server")
 
 	return cc
 }
@@ -76,13 +76,12 @@ func (c *Client) fetchIndices() {
 	c.Indices = gjson.Parse(j).Array()
 }
 
-
 /**
  * Get server version from API.
  */
 func (c *Client) getServerVersion() {
 	var (
-		r  map[string]interface{}
+		r map[string]interface{}
 	)
 
 	res, err := c.Client.Info()

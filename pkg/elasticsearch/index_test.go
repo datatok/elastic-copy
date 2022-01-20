@@ -1,11 +1,48 @@
 package elasticsearch
 
 import (
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
-func TestIndexSelection(t *testing.T) {
+func TestExtractQuery(t *testing.T) {
+	a := assert.New(t)
+
+	t.Run("empty query", func(t *testing.T) {
+		query := "{}"
+
+		r := extractQuery(query)
+
+		a.Equal(r, "")
+	})
+
+	t.Run("only query", func(t *testing.T) {
+		query := "{\"query\":\"toto\"}"
+
+		r := extractQuery(query)
+
+		a.Equal(query, r)
+	})
+
+	t.Run("query + sort", func(t *testing.T) {
+		query := "{\"query\":\"toto\", \"sort\" : \"toto\"}"
+
+		r := extractQuery(query)
+
+		a.Equal("{\"query\":\"toto\"}", r)
+	})
+
+	t.Run("only sort", func(t *testing.T) {
+		query := "{\"sort\" : \"toto\"}"
+
+		r := extractQuery(query)
+
+		a.Equal("", r)
+	})
+}
+
+func __TestIndexSelection(t *testing.T) {
 
 	a := assert.New(t)
 
@@ -21,7 +58,5 @@ func TestIndexSelection(t *testing.T) {
 
 		a.Len(indicesInfo, 3)
 	})
-
-
 
 }
