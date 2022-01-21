@@ -2,10 +2,11 @@ package commands
 
 import (
 	"fmt"
+	"io"
+
 	"github.com/ebuildy/elastic-copy/pkg/cli"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-	"io"
 )
 
 var (
@@ -33,6 +34,7 @@ func NewRootCmd(out io.Writer, args []string) *cobra.Command {
 		newRunCmd(),
 		newSamplerCmd(),
 		newCountCmd(),
+		newAliasCmd(),
 		newVersionCmd(out),
 	)
 
